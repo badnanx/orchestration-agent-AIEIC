@@ -102,13 +102,14 @@ async def student_message(body: StudentMessageRequest, request: Request):
         "integrity_flags":          [],
         "policy_blocked":           False,
         "integrity_classification": None,
+        "integrity_guidance":       None,
         "violation_detected":       False,
         "violation_count":          0,
         "reply":                    "",
-        "sources":          [],
-        "hint_level":       1,
-        "should_escalate":  False,
-        "tokens_used":      0,
+        "sources":                  [],
+        "hint_level":               1,
+        "should_escalate":          False,
+        "tokens_used":              0,
     }
 
     try:
