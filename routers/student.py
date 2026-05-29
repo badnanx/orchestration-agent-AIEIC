@@ -11,6 +11,7 @@ during the FastAPI lifespan in main.py.
 from __future__ import annotations
 
 import logging
+import time
 
 from fastapi import APIRouter, HTTPException, Request
 
@@ -65,6 +66,7 @@ async def student_message(body: StudentMessageRequest, request: Request):
     """
     session_store = _sessions(request)
     graph         = _graph(request)
+    t0 = time.perf_counter()
 
     # Step 1: resolve session
     session, created_new = session_store.get_or_create(
@@ -117,11 +119,21 @@ async def student_message(body: StudentMessageRequest, request: Request):
     except Exception as exc:
         logger.error(f"[student_message] Graph invocation failed: {exc}")
         raise HTTPException(status_code=500, detail="Orchestrator internal error")
+    
+    elapsed_ms = int((time.perf_counter() - t0) * 1000)
 
     # Step 3: update session history with this completed turn
     session.add_turn(
         user_message=body.message,
         assistant_reply=final_state["reply"],
+        response_time_ms=elapsed_ms,
+    )
+
+    logger.info(
+        "[student_message] student=%s session=%s response_time_ms=%d",
+        body.student_id,
+        session.session_id,
+        elapsed_ms,
     )
 
     # Step 4: return
